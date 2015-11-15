@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"h12.me/gspec/util"
+	"h12.me/realtest/util"
 )
 
 func dockerRun(args []string) (string, error) {

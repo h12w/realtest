@@ -6,12 +6,10 @@ import (
 )
 
 func TestIt(t *testing.T) {
-	zk := ZooKeeper{"192.168.59.103:2181"}
-	topic, err := zk.NewTopic(2)
-	fmt.Println(topic)
+	s, err := New()
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(zk.DescribeTopic(topic))
-	zk.DeleteTopic(topic)
+	fmt.Println(s.ZooKeeper.Addr())
+	fmt.Println(s.Brokers())
 }

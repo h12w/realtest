@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"h12.me/gspec/util"
+	"h12.me/realtest/util"
 )
 
 func (c Container) ip() (string, error) {

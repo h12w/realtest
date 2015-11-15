@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-	"h12.me/gspec/docker/container"
+	"h12.me/realtest/container"
 )
 
 const (
-	containerName = "gspec-db-redis-ac3bfb841b3c47378dfdecca51b23042"
+	containerName = "realtest-redis-ac3bfb841b3c47378dfdecca51b23042"
 	internalPort  = 6379
 )
 

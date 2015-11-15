@@ -7,11 +7,11 @@ import (
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
-	"h12.me/gspec/docker/container"
+	"h12.me/realtest/container"
 )
 
 const (
-	containerName = "gspec-db-mysql-f762b7f19a06403cb27bc8ab5f735840"
+	containerName = "realtest-mysql-f762b7f19a06403cb27bc8ab5f735840"
 	internalPort  = 3306
 )
 
@@ -27,7 +27,7 @@ type Database struct {
 func New() (*Database, error) {
 	c, err := container.Find(containerName)
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish=3306:3306", "--env=MYSQL_ROOT_PASSWORD="+password, "mysql:latest")
+		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "--env=MYSQL_ROOT_PASSWORD="+password, "mysql:latest")
 		if err != nil {
 			return nil, err
 		}

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"h12.me/gspec/util"
+	"h12.me/realtest/util"
 )
 
 type Container struct {

@@ -5,11 +5,11 @@ import (
 	"strconv"
 
 	"gopkg.in/mgo.v2"
-	"h12.me/gspec/docker/container"
+	"h12.me/realtest/container"
 )
 
 const (
-	containerName = "gspec-db-mongo-79cb399e9230494cb475d8461a0183c7"
+	containerName = "realtest-mongo-79cb399e9230494cb475d8461a0183c7"
 	internalPort  = 27017
 )
 
@@ -24,7 +24,7 @@ type Mongo struct {
 func New() (*Mongo, error) {
 	c, err := container.Find(containerName)
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish=27017:27017", "mongo:latest")
+		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "mongo:latest")
 		if err != nil {
 			return nil, err
 		}

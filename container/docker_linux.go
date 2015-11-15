@@ -3,11 +3,12 @@ package container
 import (
 	"errors"
 
-	"h12.me/gspec/util"
+	"h12.me/realtest/util"
 )
 
 func (c *Container) ip() (string, error) {
-	return "127.0.0.1", nil
+	ip, err := util.LocalIP()
+	return ip.String(), err
 	/*
 		type networkSettings struct {
 			IPAddress string

@@ -44,7 +44,7 @@ func New() (*KafkaCluster, error) {
 				"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.ID(),
 				fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
 				"--volume=/var/run/docker.sock:/var/run/docker.sock",
-				"h12w/kafka",
+				"h12w/kafka:latest",
 			)
 			if err != nil {
 				return nil, err

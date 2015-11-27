@@ -41,7 +41,7 @@ func New() (*KafkaCluster, error) {
 			c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true",
 				fmt.Sprintf("--link=%s:zk", zk.Name()),
 				"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
-				"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.ID(),
+				"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
 				fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
 				"--volume=/var/run/docker.sock:/var/run/docker.sock",
 				"h12w/kafka:latest",

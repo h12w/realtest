@@ -75,6 +75,11 @@ func (c *Container) Remove() error {
 	return util.Command("docker", "rm", c.ID).Run()
 }
 
-func (c Container) Log() string {
+func (c *Container) Log() string {
 	return string(util.Command("docker", "logs", c.ID).Output())
+}
+
+func (c *Container) Command(cmd string, args ...string) *util.Cmd {
+	args = append([]string{"exec", c.ID, cmd}, args...)
+	return util.Command("docker", args...)
 }

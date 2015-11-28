@@ -1,22 +1,21 @@
 package kafka
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
 
 	"h12.me/realtest/container"
-	"h12.me/realtest/util"
 	"h12.me/realtest/zookeeper"
 )
 
 const (
 	containerNameTemplate = "realtest-kafka-%d-1c750b5b00864c7cad7131bf7174c70e"
 	clusterSize           = 5
-	kafkaTopicsCmd        = "kafka-topics.sh"
+	kafkaTopicsCmd        = "/opt/kafka/bin/kafka-topics.sh"
 	internalPort          = 9092
+	zkAddr                = "zk:2181/kafka"
 )
 
 func init() {
@@ -58,20 +57,25 @@ func New() (*KafkaCluster, error) {
 	}, nil
 }
 
-func (k *KafkaCluster) NewTopic(partition int) (string, error) {
-	if !util.CmdExists(kafkaTopicsCmd) {
-		return "", errors.New(kafkaTopicsCmd + " not found in path, please install Kafka first")
-	}
+func (k *KafkaCluster) anyNode() *container.Container {
+	return k.cs[rand.Intn(len(k.cs))]
+}
+
+func (k *KafkaCluster) NewTopic(topic string, partition int) error {
+	return k.anyNode().Command(kafkaTopicsCmd, "--zookeeper", zkAddr, "--create", "--topic", topic, "--partitions", strconv.Itoa(partition), "--replication-factor", "1").Run()
+}
+
+func (k *KafkaCluster) NewRandomTopic(partition int) (string, error) {
 	topic := "topic_" + strconv.Itoa(rand.Int())
-	return topic, util.Command(kafkaTopicsCmd, "--zookeeper", k.ZooKeeper.Addr(), "--create", "--topic", topic, "--partitions", strconv.Itoa(partition), "--replication-factor", "1").Run()
+	return topic, k.NewTopic(topic, partition)
 }
 
 func (k *KafkaCluster) DeleteTopic(topic string) error {
-	return util.Command(kafkaTopicsCmd, "--zookeeper", k.ZooKeeper.Addr(), "--delete", "--topic", topic).Run()
+	return k.anyNode().Command(kafkaTopicsCmd, "--zookeeper", zkAddr, "--delete", "--topic", topic).Run()
 }
 
 func (k *KafkaCluster) DescribeTopic(topic string) string {
-	return string(util.Command(kafkaTopicsCmd, "--zookeeper", k.ZooKeeper.Addr(), "--describe", "--topic", topic).Output())
+	return string(k.anyNode().Command(kafkaTopicsCmd, "--zookeeper", zkAddr, "--describe", "--topic", topic).Output())
 }
 
 func (k *KafkaCluster) Brokers() []string {

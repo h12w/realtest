@@ -85,3 +85,7 @@ func (k *KafkaCluster) Brokers() []string {
 	}
 	return res
 }
+
+func (k *KafkaCluster) AnyBroker() string {
+	return k.anyNode().Addr(internalPort)
+}

@@ -22,12 +22,12 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-type KafkaCluster struct {
+type Cluster struct {
 	*zookeeper.ZooKeeper
 	cs []*container.Container
 }
 
-func New() (*KafkaCluster, error) {
+func New() (*Cluster, error) {
 	zk, err := zookeeper.New()
 	if err != nil {
 		return nil, err
@@ -40,6 +40,8 @@ func New() (*KafkaCluster, error) {
 			c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true",
 				fmt.Sprintf("--link=%s:zk", zk.Name()),
 				"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
+				"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=1",
+				"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
 				"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
 				fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
 				"--volume=/var/run/docker.sock:/var/run/docker.sock",
@@ -51,34 +53,34 @@ func New() (*KafkaCluster, error) {
 		}
 		cs[i] = c
 	}
-	return &KafkaCluster{
+	return &Cluster{
 		ZooKeeper: zk,
 		cs:        cs,
 	}, nil
 }
 
-func (k *KafkaCluster) anyNode() *container.Container {
+func (k *Cluster) anyNode() *container.Container {
 	return k.cs[rand.Intn(len(k.cs))]
 }
 
-func (k *KafkaCluster) NewTopic(topic string, partition int) error {
+func (k *Cluster) NewTopic(topic string, partition int) error {
 	return k.anyNode().Command(kafkaTopicsCmd, "--zookeeper", zkAddr, "--create", "--topic", topic, "--partitions", strconv.Itoa(partition), "--replication-factor", "1").Run()
 }
 
-func (k *KafkaCluster) NewRandomTopic(partition int) (string, error) {
+func (k *Cluster) NewRandomTopic(partition int) (string, error) {
 	topic := "topic_" + strconv.Itoa(rand.Int())
 	return topic, k.NewTopic(topic, partition)
 }
 
-func (k *KafkaCluster) DeleteTopic(topic string) error {
+func (k *Cluster) DeleteTopic(topic string) error {
 	return k.anyNode().Command(kafkaTopicsCmd, "--zookeeper", zkAddr, "--delete", "--topic", topic).Run()
 }
 
-func (k *KafkaCluster) DescribeTopic(topic string) string {
+func (k *Cluster) DescribeTopic(topic string) string {
 	return string(k.anyNode().Command(kafkaTopicsCmd, "--zookeeper", zkAddr, "--describe", "--topic", topic).Output())
 }
 
-func (k *KafkaCluster) Brokers() []string {
+func (k *Cluster) Brokers() []string {
 	res := make([]string, len(k.cs))
 	for i, c := range k.cs {
 		res[i] = c.Addr(internalPort)
@@ -86,6 +88,10 @@ func (k *KafkaCluster) Brokers() []string {
 	return res
 }
 
-func (k *KafkaCluster) AnyBroker() string {
+func (k *Cluster) AnyBroker() string {
 	return k.anyNode().Addr(internalPort)
+}
+
+func RandomGroup() string {
+	return "group_" + strconv.Itoa(rand.Int())
 }

@@ -40,7 +40,7 @@ func New() (*Cluster, error) {
 			c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true",
 				fmt.Sprintf("--link=%s:zk", zk.Name()),
 				"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
-				"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=1",
+				"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=1000",
 				"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
 				"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
 				fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),

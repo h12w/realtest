@@ -60,14 +60,14 @@ func New() (*Cluster, error) {
 	for i := range cs {
 		containerName := fmt.Sprintf(containerNameTemplate, i)
 		wg.Add(1)
-		go func(pc **container.Container) {
+		go func(i int) {
 			defer wg.Done()
 			c, err := findOrCreateKafka(containerName, i, zk)
 			if err != nil {
 				merr.Add(err)
 			}
-			*pc = c
-		}(&cs[i])
+			cs[i] = c
+		}(i)
 	}
 	wg.Wait()
 	return &Cluster{

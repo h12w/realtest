@@ -14,3 +14,14 @@ Includes:
   - Redis
 * Configuration service
   - ZooKeeper
+
+Author
+------
+
+[Hǎiliàng Wáng](https://github.com/h12w)
+
+Contributors
+------------
+
+* [Tao Huang](https://github.com/AnotherGoogleFans)
+

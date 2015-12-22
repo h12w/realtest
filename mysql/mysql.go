@@ -17,14 +17,28 @@ const (
 
 const password = "1234"
 
-type Database struct {
-	DBName  string
+type MySQL struct {
 	ConnStr string
 	*sql.DB
 	c *container.Container
 }
 
-func New() (*Database, error) {
+func (m *MySQL) CreateDatabase(dbName string) error {
+	if _, err := m.DB.Exec("CREATE DATABASE " + dbName); err != nil {
+		return err
+	}
+	if _, err := m.DB.Exec("USE " + dbName); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MySQL) CreateRandomDatabase() (string, error) {
+	dbName := "db_" + strconv.Itoa(rand.Int())
+	return dbName, m.CreateDatabase(dbName)
+}
+
+func New() (*MySQL, error) {
 	c, err := container.Find(containerName)
 	if err != nil {
 		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "--env=MYSQL_ROOT_PASSWORD="+password, "mysql:latest")
@@ -39,29 +53,26 @@ func New() (*Database, error) {
 		c.Close()
 		return nil, err
 	}
-	dbName := "db_" + strconv.Itoa(rand.Int())
-	if _, err := x.Exec("CREATE DATABASE " + dbName); err != nil {
-		return nil, err
-	}
-	if _, err := x.Exec("USE " + dbName); err != nil {
-		return nil, err
-	}
-	return &Database{
-		ConnStr: connStr + dbName,
-		DBName:  dbName,
+
+	return &MySQL{
+		ConnStr: connStr,
 		DB:      x,
 		c:       c,
 	}, nil
 }
 
-func (s *Database) Close() {
-	s.DB.Exec("DROP DATABASE " + s.DBName)
+func (m *MySQL) DeleteDatabase(dbName string) error {
+	_, err := m.DB.Exec("DROP DATABASE " + dbName)
+	return err
+}
+
+func (s *MySQL) Close() {
 	if s.DB != nil {
 		s.DB.Close()
 		s.DB = nil
 	}
 }
 
-func (s *Database) Addr() string {
+func (s *MySQL) Addr() string {
 	return s.c.Addr(internalPort)
 }

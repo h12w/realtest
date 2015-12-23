@@ -30,7 +30,7 @@ func initDocker() error {
 		envSettings := strings.Split(string(util.Command("docker-machine", "env", "default").Output()), "\n")
 		for _, line := range envSettings {
 			line = strings.TrimSpace(line)
-			if line == "" {
+			if line == "" || strings.HasPrefix(line, "#") {
 				continue
 			}
 			line = strings.TrimPrefix(line, "export ")

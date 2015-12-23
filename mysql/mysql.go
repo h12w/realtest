@@ -34,8 +34,12 @@ func (m *MySQL) CreateDatabase(dbName string) error {
 }
 
 func (m *MySQL) CreateRandomDatabase() (string, error) {
-	dbName := "db_" + strconv.Itoa(rand.Int())
+	dbName := RandomDBName()
 	return dbName, m.CreateDatabase(dbName)
+}
+
+func RandomDBName() string {
+	return "db_" + strconv.Itoa(rand.Int())
 }
 
 func New() (*MySQL, error) {

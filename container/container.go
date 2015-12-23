@@ -3,11 +3,16 @@ package container
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"time"
 
 	"h12.me/realtest/util"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 type Container struct {
 	ID    string

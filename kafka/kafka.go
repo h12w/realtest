@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"strconv"
 	"sync"
-	"time"
 
 	"h12.me/realtest/container"
 	"h12.me/realtest/zookeeper"
@@ -18,10 +17,6 @@ const (
 	internalPort          = 9092
 	zkAddr                = "zk:2181/kafka"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 type Cluster struct {
 	*zookeeper.ZooKeeper

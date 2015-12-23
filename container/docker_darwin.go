@@ -21,7 +21,7 @@ func initDocker() error {
 	}
 	if status := string(util.Command("docker-machine", "status", "default").Output()); status != "Running" {
 		log.Println("docker-machine start ...")
-		if err := util.Command("docker-machine", "start").Run(); err != nil {
+		if err := util.Command("docker-machine", "start", "default").Run(); err != nil {
 			return err
 		}
 	}

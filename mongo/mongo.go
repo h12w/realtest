@@ -14,7 +14,6 @@ const (
 )
 
 type Mongo struct {
-	DBName  string
 	ConnStr string
 	*mgo.Session
 	*mgo.Database
@@ -35,22 +34,22 @@ func New() (*Mongo, error) {
 		c.Close()
 		return nil, err
 	}
-	dbName := "db_" + strconv.Itoa(rand.Int())
-	db := session.DB(dbName)
 	return &Mongo{
-		DBName:   dbName,
-		ConnStr:  connStr,
-		Session:  session,
-		Database: db,
-		c:        c,
+		ConnStr: connStr,
+		Session: session,
+		c:       c,
 	}, nil
 }
 
+func (m *Mongo) NewDB(dbName string) *mgo.Database {
+	return m.Session.DB(dbName)
+}
+
+func (m *Mongo) NewRandomDB() *mgo.Database {
+	return m.Session.DB("db_" + strconv.Itoa(rand.Int()))
+}
+
 func (s *Mongo) Close() {
-	if s.Database != nil {
-		s.Database.DropDatabase()
-		s.Database = nil
-	}
 	if s.Session != nil {
 		s.Session.Close()
 		s.Session = nil

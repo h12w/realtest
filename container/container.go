@@ -76,8 +76,12 @@ func (c *Container) anyAddr() string {
 	return ""
 }
 
-func (c *Container) Addr(port int) string {
-	return c.IP + ":" + strconv.Itoa(c.Ports[port])
+func (c *Container) Addr(internalPort int) string {
+	return c.IP + ":" + c.Port(internalPort)
+}
+
+func (c *Container) Port(internalPort int) string {
+	return strconv.Itoa(c.Ports[internalPort])
 }
 
 // KillRemove calls Kill on the container, and then Remove if there was

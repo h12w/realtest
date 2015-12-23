@@ -2,8 +2,6 @@ package mongo
 
 import (
 	"testing"
-
-	"github.com/mongodb/mongo-tools/mongoimport"
 )
 
 func TestNewClose(t *testing.T) {
@@ -19,5 +17,12 @@ func TestImport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	if _, err := s.ImportCollection("testdb", "testc", `
+{
+	"a": 123,
+	"b": 456
+}
+`); err != nil {
+		t.Fatal(err)
+	}
 }

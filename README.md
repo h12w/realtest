@@ -1,5 +1,5 @@
-Real test environment for Go
-============================
+RealTest: real test environment for Go
+======================================
 
 h12.me/realtest provides real test environment for Go unit testing, based on Docker.
 
@@ -24,4 +24,3 @@ Contributors
 ------------
 
 * [Tao Huang](https://github.com/AnotherGoogleFans)
-

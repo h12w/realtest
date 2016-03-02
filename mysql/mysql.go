@@ -1,10 +1,13 @@
 package mysql
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"h12.me/realtest/container"
@@ -15,7 +18,10 @@ const (
 	internalPort  = 3306
 )
 
-const password = "1234"
+const (
+	User     = "root"
+	Password = "1234"
+)
 
 type MySQL struct {
 	ConnStr string
@@ -45,13 +51,13 @@ func RandomDBName() string {
 func New() (*MySQL, error) {
 	c, err := container.Find(containerName)
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "--env=MYSQL_ROOT_PASSWORD="+password, "mysql:latest")
+		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "--env=MYSQL_ROOT_PASSWORD="+Password, "mysql:latest")
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	connStr := fmt.Sprintf("root:%s@tcp(%s)/", password, c.Addr(internalPort))
+	connStr := fmt.Sprintf("root:%s@tcp(%s)/", Password, c.Addr(internalPort))
 	x, err := sql.Open("mysql", connStr)
 	if err != nil {
 		c.Close()
@@ -68,6 +74,34 @@ func New() (*MySQL, error) {
 func (m *MySQL) DeleteDatabase(dbName string) error {
 	_, err := m.DB.Exec("DROP DATABASE " + dbName)
 	return err
+}
+
+func (m *MySQL) DumpCSV(n int, query string, args ...interface{}) (string, error) {
+	buf := new(bytes.Buffer)
+	w := csv.NewWriter(buf)
+	rows, err := m.DB.Query(query, args...)
+	if err != nil {
+		return "", err
+	}
+	for rows.Next() {
+		fields := make([]sql.RawBytes, n)
+		values := make([]interface{}, n)
+		for i := range values {
+			values[i] = &fields[i]
+		}
+		if err := rows.Scan(values...); err != nil {
+			return "", err
+		}
+		record := make([]string, n)
+		for i := range record {
+			record[i] = string(fields[i])
+		}
+		if err := w.Write(record); err != nil {
+			return "", err
+		}
+	}
+	w.Flush()
+	return strings.TrimSpace(buf.String()), nil
 }
 
 func (s *MySQL) Close() {

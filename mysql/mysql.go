@@ -41,7 +41,10 @@ func (m *MySQL) CreateDatabase(dbName string) error {
 
 func (m *MySQL) CreateRandomDatabase() (string, error) {
 	dbName := RandomDBName()
-	return dbName, m.CreateDatabase(dbName)
+	if err := m.CreateDatabase(dbName); err != nil {
+		return "", err
+	}
+	return dbName, nil
 }
 
 func RandomDBName() string {

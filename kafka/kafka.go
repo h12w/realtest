@@ -91,7 +91,6 @@ func findOrCreateKafka(containerName string, i int, zk *zookeeper.ZooKeeper) (*c
 			"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=10000",
 			"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
 			"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
-			"--env=KAFKA_ADVERTISED_PORT=9092",
 			fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
 			"--volume=/var/run/docker.sock:/var/run/docker.sock",
 			"h12w/kafka:latest",

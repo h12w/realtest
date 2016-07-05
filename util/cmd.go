@@ -16,6 +16,7 @@ type Cmd struct {
 func Command(name string, arg ...string) *Cmd {
 	cmd := Cmd{c: exec.Command(name, arg...)}
 	cmd.c.Stderr = &cmd.errBuf
+	//fmt.Println(cmd.String())
 	return &cmd
 }
 

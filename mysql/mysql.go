@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/go-sql-driver/mysql"
 	"h12.me/realtest/container"
 )
 

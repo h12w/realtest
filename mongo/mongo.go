@@ -21,12 +21,9 @@ type Mongo struct {
 }
 
 func New() (*Mongo, error) {
-	c, err := container.Find(containerName)
+	c, err := container.FindOrCreate(containerName, "mongo:latest")
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "mongo:latest")
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	connStr := "mongodb://" + c.Addr(internalPort)
 	session, err := mgo.Dial(connStr)

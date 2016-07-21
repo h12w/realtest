@@ -51,12 +51,9 @@ func RandomDBName() string {
 }
 
 func New() (*MySQL, error) {
-	c, err := container.Find(containerName)
+	c, err := container.FindOrCreate(containerName, "mysql:latest", "--env=MYSQL_ROOT_PASSWORD="+Password)
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "--env=MYSQL_ROOT_PASSWORD="+Password, "mysql:latest")
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	connStr := fmt.Sprintf("root:%s@tcp(%s)/", Password, c.Addr(internalPort))

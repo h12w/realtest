@@ -9,6 +9,18 @@ import (
 	"h12.me/realtest/util"
 )
 
+func dockerImageExists(image string) (bool, error) {
+	cmd := util.Command("docker", "images", "--quiet=true", image)
+	if len(cmd.Output()) > 0 && cmd.Err() == nil {
+		return true, nil
+	}
+	return false, cmd.Err()
+}
+
+func dockerPull(image string) error {
+	return util.Command("docker", "pull", image).Run()
+}
+
 func dockerRun(args []string) (string, error) {
 	args = append([]string{"run"}, args...)
 	cmd := util.Command("docker", args...)

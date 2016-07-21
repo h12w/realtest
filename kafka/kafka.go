@@ -83,24 +83,15 @@ func New() (*Cluster, error) {
 }
 
 func findOrCreateKafka(containerName string, i int, zk *zookeeper.ZooKeeper) (*container.Container, error) {
-	c, err := container.Find(containerName)
-	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true",
-			fmt.Sprintf("--link=%s:zk", zk.Name()),
-			"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
-			"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=10000",
-			"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
-			"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
-			fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
-			"--volume=/var/run/docker.sock:/var/run/docker.sock",
-			"h12w/kafka:latest",
-		)
-		if err != nil {
-			return nil, err
-		}
-		return c, nil
-	}
-	return c, nil
+	return container.FindOrCreate(containerName, "h12w/kafka:latest",
+		fmt.Sprintf("--link=%s:zk", zk.Name()),
+		"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
+		"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=10000",
+		"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
+		"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
+		fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
+		"--volume=/var/run/docker.sock:/var/run/docker.sock",
+	)
 }
 
 func (k *Cluster) anyNode() *container.Container {

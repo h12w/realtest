@@ -20,15 +20,11 @@ type Container struct {
 	Ports map[int]int
 }
 
-func New(args ...string) (*Container, error) {
-	if err := initDocker(); err != nil {
-		return nil, err
-	}
-	id, err := dockerRun(args)
+func FindOrCreate(containerName, image string, args ...string) (*Container, error) {
+	c, err := Find(containerName)
 	if err != nil {
-		return nil, err
+		c, err = Create(containerName, image, args)
 	}
-	c, err := newContainer(id)
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +33,31 @@ func New(args ...string) (*Container, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+func Create(containerName, image string, args []string) (*Container, error) {
+	if err := initDocker(); err != nil {
+		return nil, err
+	}
+	exists, err := dockerImageExists(image)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		fmt.Println("docker pull " + image)
+		if err := dockerPull(image); err != nil {
+			return nil, err
+		}
+	}
+	id, err := dockerRun(append(args,
+		"--name="+containerName,
+		"--detach=true",
+		"--publish-all=true",
+		image))
+	if err != nil {
+		return nil, err
+	}
+	return newContainer(id)
 }
 
 func Find(name string) (*Container, error) {
@@ -50,11 +71,7 @@ func Find(name string) (*Container, error) {
 	if err = dockerStart(id); err != nil {
 		return nil, err
 	}
-	c, err := newContainer(id)
-	if err != nil {
-		return nil, err
-	}
-	return c, nil
+	return newContainer(id)
 }
 
 func newContainer(id string) (_ *Container, err error) {

@@ -14,12 +14,9 @@ type ZooKeeper struct {
 }
 
 func New() (*ZooKeeper, error) {
-	c, err := container.Find(containerName)
+	c, err := container.FindOrCreate(containerName, "h12w/zookeeper:latest")
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "h12w/zookeeper:latest")
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	return &ZooKeeper{
 		c: c,

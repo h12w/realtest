@@ -18,12 +18,9 @@ type Redis struct {
 }
 
 func New() (*Redis, error) {
-	c, err := container.Find(containerName)
+	c, err := container.FindOrCreate(containerName, "redis:latest")
 	if err != nil {
-		c, err = container.New("--name="+containerName, "--detach=true", "--publish-all=true", "redis")
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	return &Redis{
 		pool: &redis.Pool{

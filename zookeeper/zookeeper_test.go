@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestMysql(t *testing.T) {
+func TestZK(t *testing.T) {
 	s, err := New()
 	if err != nil {
 		t.Fatal(err)

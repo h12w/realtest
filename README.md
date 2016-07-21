@@ -10,6 +10,7 @@ Includes:
 * Database:
   - MySQL
   - MongoDB
+  - InfluxDB
 * Cache
   - Redis
 * Configuration service

@@ -1,7 +1,9 @@
 package influx
 
 import (
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -15,8 +17,10 @@ const (
 )
 
 type InfluxDB struct {
-	c *container.Container
+	c    *container.Container
+	addr string
 	client.Client
+	httpClient http.Client
 }
 
 func New() (*InfluxDB, error) {
@@ -34,6 +38,7 @@ func New() (*InfluxDB, error) {
 	}
 	return &InfluxDB{
 		c:      c,
+		addr:   addr,
 		Client: influxClient,
 	}, nil
 }
@@ -80,4 +85,32 @@ func (d *InfluxDB) DeleteDatabase(dbName string) error {
 
 func RandomDBName() string {
 	return "db_" + strconv.Itoa(rand.Int())
+}
+
+func (d *InfluxDB) Dump(command, db string) (string, error) {
+	buf, err := d.query(client.NewQuery(command, db, "ns"))
+	return string(buf), err
+}
+
+func (d *InfluxDB) query(q client.Query) ([]byte, error) {
+	req, err := http.NewRequest("POST", d.addr+"/query", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "")
+
+	params := req.URL.Query()
+	params.Set("q", q.Command)
+	params.Set("db", q.Database)
+	if q.Precision != "" {
+		params.Set("epoch", q.Precision)
+	}
+	req.URL.RawQuery = params.Encode()
+
+	resp, err := d.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
 }

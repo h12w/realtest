@@ -1,19 +1,11 @@
 package kafka
 
 import (
-	"encoding"
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"sort"
 	"strconv"
-	"strings"
 	"sync"
 
-	"h12.me/kpax/broker"
-	"h12.me/kpax/cluster"
-	"h12.me/kpax/consumer"
-	"h12.me/kpax/proto"
 	"h12.me/realtest/container"
 	"h12.me/realtest/zookeeper"
 )
@@ -25,6 +17,15 @@ const (
 	internalPort          = 9092
 	zkAddr                = "zk:2181/kafka"
 )
+
+var containerNames = func() (names []container.ContainerName) {
+	for i := 0; i < clusterSize; i++ {
+		names = append(names, container.ContainerName{Name: fmt.Sprintf(containerNameTemplate, i)})
+	}
+	return
+}()
+
+var mu sync.Mutex
 
 type Cluster struct {
 	*zookeeper.ZooKeeper
@@ -59,13 +60,20 @@ func New() (*Cluster, error) {
 	if err != nil {
 		return nil, err
 	}
-	cs := make([]*container.Container, clusterSize)
+	cs := make([]*container.Container, len(containerNames))
 	for i := range cs {
-		containerName := fmt.Sprintf(containerNameTemplate, i)
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			c, err := findOrCreateKafka(containerName, i, zk)
+			c, err := containerNames[i].FindOrCreate("h12w/kafka:latest",
+				fmt.Sprintf("--link=%s:zk", zk.Name()),
+				"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
+				"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=10000",
+				"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
+				"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
+				fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
+				"--volume=/var/run/docker.sock:/var/run/docker.sock",
+			)
 			if err != nil {
 				merr.Add(err)
 			}
@@ -80,18 +88,6 @@ func New() (*Cluster, error) {
 		ZooKeeper: zk,
 		cs:        cs,
 	}, nil
-}
-
-func findOrCreateKafka(containerName string, i int, zk *zookeeper.ZooKeeper) (*container.Container, error) {
-	return container.FindOrCreate(containerName, "h12w/kafka:latest",
-		fmt.Sprintf("--link=%s:zk", zk.Name()),
-		"--env=KAFKA_DELETE_TOPIC_ENABLE=true",
-		"--env=KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS=10000",
-		"--env=KAFKA_OFFSETS_RETENTION_MINUTES=1",
-		"--env=KAFKA_ADVERTISED_HOST_NAME="+zk.IP(),
-		fmt.Sprintf("--env=KAFKA_BROKER_ID=%d", i),
-		"--volume=/var/run/docker.sock:/var/run/docker.sock",
-	)
 }
 
 func (k *Cluster) anyNode() *container.Container {
@@ -126,49 +122,6 @@ func (k *Cluster) Brokers() []string {
 
 func (k *Cluster) AnyBroker() string {
 	return k.anyNode().Addr(internalPort)
-}
-
-func (k *Cluster) Dump(topic string, newObj func() encoding.BinaryUnmarshaler) (string, error) {
-	cl := cluster.New(broker.NewDefault, k.Brokers())
-	partitions, err := cl.Partitions(topic)
-	if err != nil {
-		return "", err
-	}
-	cr := consumer.New(cl)
-	var lines []string
-	for _, partition := range partitions {
-		start, err := cr.FetchOffsetByTime(topic, partition, proto.Earliest)
-		if err != nil {
-			return "", err
-		}
-		end, err := cr.FetchOffsetByTime(topic, partition, proto.Latest)
-		if err != nil {
-			return "", err
-		}
-		for offset := start; offset < end; {
-			messages, err := cr.Consume(topic, partition, offset)
-			if err != nil {
-				return "", err
-			}
-			if len(messages) == 0 {
-				break
-			}
-			for _, message := range messages {
-				obj := newObj()
-				if err := obj.UnmarshalBinary(message.Value); err != nil {
-					return "", err
-				}
-				jsonBuf, err := json.MarshalIndent(obj, "", "\t")
-				if err != nil {
-					return "", err
-				}
-				lines = append(lines, string(jsonBuf))
-			}
-			offset += messages[len(messages)-1].Offset + 1
-		}
-	}
-	sort.Strings(lines)
-	return strings.Join(lines, "\n"), nil
 }
 
 func RandomGroup() string {

@@ -5,8 +5,11 @@ import (
 )
 
 const (
-	containerName = "realtest-zookeeper-a34ea1a3e95244de8f278c79e9b2cb94"
-	internalPort  = 2181
+	internalPort = 2181
+)
+
+var (
+	containerName = container.ContainerName{Name: "realtest-zookeeper-a34ea1a3e95244de8f278c79e9b2cb94"}
 )
 
 type ZooKeeper struct {
@@ -14,7 +17,7 @@ type ZooKeeper struct {
 }
 
 func New() (*ZooKeeper, error) {
-	c, err := container.FindOrCreate(containerName, "h12w/zookeeper:latest")
+	c, err := containerName.FindOrCreate("h12w/zookeeper:latest")
 	if err != nil {
 		return nil, err
 	}
@@ -36,5 +39,5 @@ func (s *ZooKeeper) IP() string {
 }
 
 func (s *ZooKeeper) Name() string {
-	return containerName
+	return containerName.Name
 }

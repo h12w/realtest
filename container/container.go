@@ -5,10 +5,16 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 
 	"h12.me/realtest/util"
 )
+
+type ContainerName struct {
+	Name string
+	mu   sync.Mutex
+}
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -20,16 +26,18 @@ type Container struct {
 	Ports map[int]int
 }
 
-func FindOrCreate(containerName, image string, args ...string) (*Container, error) {
-	c, err := Find(containerName)
+func (n *ContainerName) FindOrCreate(image string, args ...string) (*Container, error) {
+	n.mu.Lock()
+	c, err := Find(n.Name)
 	if err != nil {
-		c, err = Create(containerName, image, args)
+		c, err = Create(n.Name, image, args)
 	}
+	n.mu.Unlock()
 	if err != nil {
 		return nil, err
 	}
 	if err := util.AwaitReachable(c.anyAddr(), 30*time.Second); err != nil {
-		c.Close()
+		//c.Close()
 		return nil, err
 	}
 	return c, nil

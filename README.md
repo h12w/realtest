@@ -11,6 +11,7 @@ Includes:
   - MySQL
   - MongoDB
   - InfluxDB
+  - ElasticSearch
 * Cache
   - Redis
 * Configuration service

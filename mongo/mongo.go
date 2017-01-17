@@ -9,8 +9,13 @@ import (
 )
 
 const (
-	containerName = "realtest-mongo-79cb399e9230494cb475d8461a0183c7"
-	internalPort  = 27017
+	internalPort = 27017
+)
+
+var (
+	containerName = container.ContainerName{
+		Name: "realtest-mongo-79cb399e9230494cb475d8461a0183c7",
+	}
 )
 
 type Mongo struct {
@@ -21,7 +26,7 @@ type Mongo struct {
 }
 
 func New() (*Mongo, error) {
-	c, err := container.FindOrCreate(containerName, "mongo:latest")
+	c, err := containerName.FindOrCreate("mongo:latest")
 	if err != nil {
 		return nil, err
 	}

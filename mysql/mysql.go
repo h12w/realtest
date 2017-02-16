@@ -12,9 +12,14 @@ import (
 	"h12.me/realtest/container"
 )
 
+var (
+	containerName = container.ContainerName{
+		Name: "realtest-mysql-f762b7f19a06403cb27bc8ab5f735840",
+	}
+)
+
 const (
-	containerName = "realtest-mysql-f762b7f19a06403cb27bc8ab5f735840"
-	internalPort  = 3306
+	internalPort = 3306
 )
 
 const (
@@ -51,7 +56,7 @@ func RandomDBName() string {
 }
 
 func New() (*MySQL, error) {
-	c, err := container.FindOrCreate(containerName, "mysql:latest", "--env=MYSQL_ROOT_PASSWORD="+Password)
+	c, err := containerName.FindOrCreate("mysql:latest", "--env=MYSQL_ROOT_PASSWORD="+Password)
 	if err != nil {
 		return nil, err
 	}

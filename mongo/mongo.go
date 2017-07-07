@@ -48,7 +48,7 @@ func (m *Mongo) NewDB(dbName string) *mgo.Database {
 }
 
 func (m *Mongo) NewRandomDB() *mgo.Database {
-	return m.Session.DB("db_" + strconv.Itoa(rand.Int()))
+	return m.Session.DB(RandomDBName())
 }
 
 func (s *Mongo) Close() {
@@ -60,4 +60,8 @@ func (s *Mongo) Close() {
 
 func (s *Mongo) Addr() string {
 	return s.c.Addr(internalPort)
+}
+
+func RandomDBName() string {
+	return "db_" + strconv.Itoa(rand.Int())
 }

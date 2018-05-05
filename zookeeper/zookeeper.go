@@ -1,7 +1,7 @@
 package zookeeper
 
 import (
-	"h12.me/realtest/container"
+	"h12.io/realtest/container"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
-	"h12.me/realtest/container"
+	"h12.io/realtest/container"
 )
 
 const (

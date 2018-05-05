@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"h12.me/realtest/util"
+	"h12.io/realtest/util"
 )
 
 func dockerImageExists(image string) (bool, error) {

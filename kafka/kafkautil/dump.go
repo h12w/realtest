@@ -6,11 +6,11 @@ import (
 	"sort"
 	"strings"
 
-	"h12.me/kpax/broker"
-	"h12.me/kpax/cluster"
-	"h12.me/kpax/consumer"
-	"h12.me/kpax/proto"
-	"h12.me/realtest/kafka"
+	"h12.io/kpax/broker"
+	"h12.io/kpax/cluster"
+	"h12.io/kpax/consumer"
+	"h12.io/kpax/proto"
+	"h12.io/realtest/kafka"
 )
 
 func Dump(k *kafka.Cluster, topic string, newObj func() encoding.BinaryUnmarshaler) (string, error) {

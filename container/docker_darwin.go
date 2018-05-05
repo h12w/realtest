@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"h12.me/realtest/util"
+	"h12.io/realtest/util"
 )
 
 func (c Container) ip() (string, error) {

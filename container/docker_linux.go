@@ -3,7 +3,7 @@ package container
 import (
 	"errors"
 
-	"h12.me/realtest/util"
+	"h12.io/realtest/util"
 )
 
 func (c *Container) ip() (string, error) {

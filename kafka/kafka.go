@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"sync"
 
-	"h12.me/realtest/container"
-	"h12.me/realtest/zookeeper"
+	"h12.io/realtest/container"
+	"h12.io/realtest/zookeeper"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"h12.me/realtest/util"
+	"h12.io/realtest/util"
 )
 
 type ContainerName struct {

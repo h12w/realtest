@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-	"h12.me/realtest/container"
+	"h12.io/realtest/container"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"gopkg.in/mgo.v2"
-	"h12.me/realtest/container"
+	"h12.io/realtest/container"
 )
 
 const (
